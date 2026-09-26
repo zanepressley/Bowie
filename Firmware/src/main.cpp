@@ -8,13 +8,13 @@ const char* PASSWORD = "heyheyhey";
 const uint16_t UDP_PORT = 4210;
 
 // Motor pins
-const int LEFT_PWM_PIN = 18;
-const int RIGHT_PWM_PIN = 19;
-const int RIGHT_DIR_1_PIN = 1;
-const int RIGHT_DIR_2_PIN = 1;
-const int LEFT_DIR_1_PIN = 1;
-const int LEFT_DIR_2_PIN = 1;
-const int SERVO_PIN = 1;
+const int LEFT_PWM_PIN = 0;
+const int RIGHT_PWM_PIN = 9;
+const int RIGHT_DIR_1_PIN = 7;
+const int RIGHT_DIR_2_PIN = 38;
+const int LEFT_DIR_1_PIN = 3;
+const int LEFT_DIR_2_PIN = 18;
+const int SERVO_PIN = 47;
 
 // Safety timeout
 const uint32_t COMMAND_TIMEOUT_MS = 500;
