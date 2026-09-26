@@ -98,7 +98,7 @@ for (int i = 0; i < networks; i++)
     Serial.println("Wi-Fi: CONNECTED");
     Serial.print("IP: ");
     Serial.println(WiFi.localIP());
-
+  
     // Start network task on Core 0
     xTaskCreatePinnedToCore(
         networkTask,
