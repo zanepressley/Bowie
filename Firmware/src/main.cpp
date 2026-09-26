@@ -10,6 +10,11 @@ const uint16_t UDP_PORT = 4210;
 // Motor pins
 const int LEFT_PWM_PIN = 18;
 const int RIGHT_PWM_PIN = 19;
+const int RIGHT_DIR_1_PIN = 1;
+const int RIGHT_DIR_2_PIN = 1;
+const int LEFT_DIR_1_PIN = 1;
+const int LEFT_DIR_2_PIN = 1;
+const int SERVO_PIN = 1;
 
 // Safety timeout
 const uint32_t COMMAND_TIMEOUT_MS = 500;
@@ -18,6 +23,7 @@ const uint32_t COMMAND_TIMEOUT_MS = 500;
 struct TeleopCommand {
     float left_drive;
     float right_drive;
+    float servo_pos;
     uint32_t timestamp;
 };
 
@@ -218,6 +224,7 @@ void motorTask(void* parameter)
     TeleopCommand command = {
         0.0f,
         0.0f,
+        0.0f,
         0
     };
 
@@ -238,11 +245,13 @@ void motorTask(void* parameter)
 
         float left = 0.0f;
         float right = 0.0f;
+        float servo_pos = 0.0f;
 
         if (!timeout)
         {
             left = command.left_drive;
             right = command.right_drive;
+            servo_pos = command.servo_pos;
         }
 
         int leftPWM =
@@ -250,6 +259,9 @@ void motorTask(void* parameter)
 
         int rightPWM =
             (int)(fabs(right) * 255.0f);
+
+        int servoPWM =
+            (int)(fabs(servo_pos) * 255.0f);
 
         analogWrite(
             LEFT_PWM_PIN,
@@ -259,6 +271,11 @@ void motorTask(void* parameter)
         analogWrite(
             RIGHT_PWM_PIN,
             rightPWM
+        );
+
+        analogWrite(
+            SERVO_PIN,
+            servoPWM
         );
 
         // Status every second
@@ -279,6 +296,9 @@ void motorTask(void* parameter)
             Serial.print(" (");
             Serial.print(rightPWM);
             Serial.print(")");
+
+            Serial.print("\n SERVO POSITION: ");
+            Serial.print(servo_pos, 2);
 
             if (timeout)
             {
