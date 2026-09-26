@@ -17,7 +17,7 @@ const int LEFT_DIR_2_PIN = 33;
 const int SERVO_PIN = 27;
 
 // Safety timeout
-const uint32_t COMMAND_TIMEOUT_MS = 500;
+const uint32_t COMMAND_TIMEOUT_MS = 1000;
 
 // Command sent over Wi-Fi
 struct TeleopCommand {
@@ -109,6 +109,7 @@ for (int i = 0; i < networks; i++)
         delay(500);
         Serial.print(".");
     }
+    WiFi.setSleep(false);
 
     Serial.println();
     Serial.println("Wi-Fi: CONNECTED");
@@ -235,7 +236,7 @@ void motorTask(void* parameter)
     TickType_t lastWakeTime = xTaskGetTickCount();
 
     const TickType_t period =
-        pdMS_TO_TICKS(30);
+        pdMS_TO_TICKS(15);
 
     TeleopCommand command = {
         0.0f,
@@ -243,8 +244,9 @@ void motorTask(void* parameter)
         0.0f,
         0
     };
-
+    TickType_t lastAction = millis();
     uint32_t lastStatus = 0;
+    //TeleopCommand prior;
 
     while (true)
     {
@@ -253,79 +255,93 @@ void motorTask(void* parameter)
         if (xQueueReceive(commandQueue, &newCommand, 0))
         {
             command = newCommand;
-        }
 
-        bool timeout =
-            millis() - command.timestamp >
-            COMMAND_TIMEOUT_MS;
+            bool timeout =
+                millis() - command.timestamp >
+                COMMAND_TIMEOUT_MS;
 
-        float left = 0.0f;
-        float right = 0.0f;
-        float servo_pos = 0.0f;
+            float left = 0.0f;
+            float right = 0.0f;
+            float servo_pos = 0.0f;
 
-        if (!timeout)
-        {
-            left = command.left_drive;
-            right = command.right_drive;
-            servo_pos = command.servo_pos;
-        }
-
-        int leftPWM =
-            (int)(fabs(left) * 255.0f);
-
-        int rightPWM =
-            (int)(fabs(right) * 255.0f);
-
-        int servoPWM =
-            (int)(fabs(servo_pos) * 255.0f);
-
-        analogWrite(
-            LEFT_PWM_PIN,
-            leftPWM
-        );
-
-        analogWrite(
-            RIGHT_PWM_PIN,
-            rightPWM
-        );
-
-        analogWrite(
-            SERVO_PIN,
-            servoPWM
-        );
-
-        // Status every second
-        if (millis() - lastStatus >= 1000)
-        {
-            lastStatus = millis();
-
-            Serial.print("MOTOR | L: ");
-            Serial.print(left, 2);
-
-            Serial.print(" (");
-            Serial.print(leftPWM);
-            Serial.print(")");
-
-            Serial.print(" | R: ");
-            Serial.print(right, 2);
-
-            Serial.print(" (");
-            Serial.print(rightPWM);
-            Serial.print(")");
-
-            Serial.print("\n SERVO POSITION: ");
-            Serial.print(servo_pos, 2);
-
-            if (timeout)
+            if (!timeout)
             {
-                //Serial.println(" | TIMEOUT - STOPPED");
+                left = command.left_drive;
+                right = command.right_drive;
+                servo_pos = command.servo_pos;
             }
-            else
-            {
-                //Serial.println(" | RUNNING");
-            }
-        }
 
+            int leftPWM =
+                (int)(fabs(left) * 255.0f);
+
+            int rightPWM =
+                (int)(fabs(right) * 255.0f);
+
+            int servoPWM =
+                (int)(fabs(servo_pos) * 255.0f);
+
+            analogWrite(
+                LEFT_PWM_PIN,
+                leftPWM
+            );
+
+            analogWrite(
+                RIGHT_PWM_PIN,
+                rightPWM
+            );
+
+            analogWrite(
+                SERVO_PIN,
+                servoPWM
+            );
+
+            // Status every second
+            if (millis() - lastStatus >= 1000)
+            {
+                lastStatus = millis();
+
+                Serial.print("MOTOR | L: ");
+                Serial.print(left, 2);
+
+                Serial.print(" (");
+                Serial.print(leftPWM);
+                Serial.print(")");
+
+                Serial.print(" | R: ");
+                Serial.print(right, 2);
+
+                Serial.print(" (");
+                Serial.print(rightPWM);
+                Serial.print(")");
+
+                Serial.print("\n SERVO POSITION: ");
+                Serial.print(servo_pos, 2);
+
+                if (timeout)
+                {
+                    //Serial.println(" | TIMEOUT - STOPPED");
+                }
+                else
+                {
+                    //Serial.println(" | RUNNING");
+                }
+            } 
+            lastAction = millis();
+        }
+        if (millis() - lastAction > COMMAND_TIMEOUT_MS) 
+        {
+            analogWrite(
+                LEFT_PWM_PIN,
+                0
+            );
+
+            analogWrite(
+                RIGHT_PWM_PIN,
+                0
+            );
+
+            lastAction = millis();
+        }
         vTaskDelayUntil(
             &lastWakeTime,
             period
