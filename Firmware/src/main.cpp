@@ -8,13 +8,13 @@ const char* PASSWORD = "heyheyhey";
 const uint16_t UDP_PORT = 4210;
 
 // Motor pins
-const int LEFT_PWM_PIN = 0;
-const int RIGHT_PWM_PIN = 9;
-const int RIGHT_DIR_1_PIN = 7;
-const int RIGHT_DIR_2_PIN = 38;
-const int LEFT_DIR_1_PIN = 3;
-const int LEFT_DIR_2_PIN = 18;
-const int SERVO_PIN = 47;
+const int LEFT_PWM_PIN = 25;
+const int RIGHT_PWM_PIN = 23;
+const int RIGHT_DIR_1_PIN = 14;
+const int RIGHT_DIR_2_PIN = 12;
+const int LEFT_DIR_1_PIN = 32;
+const int LEFT_DIR_2_PIN = 33;
+const int SERVO_PIN = 27;
 
 // Safety timeout
 const uint32_t COMMAND_TIMEOUT_MS = 500;
@@ -52,6 +52,22 @@ void setup()
     pinMode(LEFT_PWM_PIN, OUTPUT);
     pinMode(RIGHT_PWM_PIN, OUTPUT);
 
+    pinMode(LEFT_DIR_1_PIN, OUTPUT);
+    pinMode(LEFT_DIR_2_PIN, OUTPUT);
+
+    pinMode(RIGHT_DIR_1_PIN, OUTPUT);
+    pinMode(RIGHT_DIR_2_PIN, OUTPUT);
+
+    pinMode(SERVO_PIN, OUTPUT);
+
+    analogWrite(LEFT_PWM_PIN, 0);
+    analogWrite(RIGHT_PWM_PIN, 0);
+    digitalWrite(LEFT_DIR_1_PIN, LOW);
+    digitalWrite(LEFT_DIR_2_PIN, LOW);
+
+    digitalWrite(RIGHT_DIR_1_PIN, LOW);
+    digitalWrite(RIGHT_DIR_2_PIN, LOW);
+
     analogWrite(LEFT_PWM_PIN, 0);
     analogWrite(RIGHT_PWM_PIN, 0);
 
@@ -70,7 +86,7 @@ void setup()
 
 
 Serial.println("Scanning for Wi-Fi...");
-
+/*
 int networks = WiFi.scanNetworks();
 
 for (int i = 0; i < networks; i++)
@@ -82,7 +98,7 @@ for (int i = 0; i < networks; i++)
     Serial.print(WiFi.RSSI(i));
     Serial.print("  Channel: ");
     Serial.println(WiFi.channel(i));
-}
+}*/
 
     WiFi.begin(SSID, PASSWORD);
 
@@ -187,13 +203,13 @@ void networkTask(void* parameter)
                         &command
                     );
 
-                    Serial.print("TELEOP RX | L: ");
-                    Serial.print(command.left_drive, 2);
+                    //Serial.print("TELEOP RX | L: ");
+                    //Serial.print(command.left_drive, 2);
 
-                    Serial.print(" | R: ");
-                    Serial.print(command.right_drive, 2);
+                    //Serial.print(" | R: ");
+                    //Serial.print(command.right_drive, 2);
 
-                    Serial.println(" | OK");
+                    //Serial.println(" | OK");
                 }
             }
             else
@@ -205,7 +221,7 @@ void networkTask(void* parameter)
             }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
@@ -219,7 +235,7 @@ void motorTask(void* parameter)
     TickType_t lastWakeTime = xTaskGetTickCount();
 
     const TickType_t period =
-        pdMS_TO_TICKS(20);
+        pdMS_TO_TICKS(30);
 
     TeleopCommand command = {
         0.0f,
@@ -302,11 +318,11 @@ void motorTask(void* parameter)
 
             if (timeout)
             {
-                Serial.println(" | TIMEOUT - STOPPED");
+                //Serial.println(" | TIMEOUT - STOPPED");
             }
             else
             {
-                Serial.println(" | RUNNING");
+                //Serial.println(" | RUNNING");
             }
         }
 

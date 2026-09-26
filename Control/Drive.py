@@ -183,7 +183,7 @@ try:
         # MOTOR SAFETY TIMEOUT
         # ========================================
 
-        if time.time() - last_drive_key_time > 0.15:
+        if time.time() - last_drive_key_time > 0.25:
 
             left = 0.0
             right = 0.0
