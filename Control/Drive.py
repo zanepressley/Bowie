@@ -124,7 +124,7 @@ try:
             if key == "w":
 
                 left = SPEED
-                right = SPEED
+                right = SPEED * 2.0
 
                 last_drive_key_time = time.time()
 
@@ -138,7 +138,7 @@ try:
             elif key == "d":
 
                 left = 0.0
-                right = SPEED
+                right = SPEED * 2.0
 
                 last_drive_key_time = time.time()
 
